@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Calculadora de Suma</title>
+  <script>
+    // Función para realizar la suma
+    function calcularSuma() {
+      // Obtener los valores de los inputs
+      const numero1 = parseFloat(document.getElementById("input1").value) || 0;
+      const numero2 = parseFloat(document.getElementById("input2").value) || 0;
+
+      // Realizar la suma
+      const resultado = numero1 + numero2;
+
+      // Mostrar el resultado en el label
+      document.getElementById("resultLabel").textContent = "Resultado: " + resultado;
+    }
+  </script>
+</head>
+<body>
+  <h1>Calculadora de Suma</h1>
+  <!-- Input para los números -->
+  <input id="input1" type="number" placeholder="Escribe el primer número">
+  <input id="input2" type="number" placeholder="Escribe el segundo número">
+  
+  <!-- Botón para realizar la suma -->
+  <button onclick="calcularSuma()">Sumar</button>
+  
+  <!-- Label para mostrar el resultado -->
+  <label id="resultLabel">Resultado: </label>
+</body>
+</html>
