@@ -3,198 +3,203 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Hucha de Euros</title>
+  <title>Calculadora de Números Grandes</title>
   <style>
     :root { color-scheme: light; }
+    * { box-sizing: border-box; }
     body {
-      font-family: Arial, sans-serif;
       margin: 0;
-      padding: 24px;
-      background: #f5f7fb;
-      color: #1e2430;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background: linear-gradient(160deg, #eef2ff, #f8fafc);
+      color: #0f172a;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 20px;
     }
-    .container {
-      max-width: 960px;
-      margin: 0 auto;
+    .app {
+      width: min(860px, 100%);
+      background: #ffffff;
+      border: 1px solid #dbe3f7;
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 10px 30px rgba(37, 57, 108, 0.12);
     }
-    h1 { margin-top: 0; }
-    .card {
-      background: #fff;
-      border: 1px solid #d9e1f2;
-      border-radius: 12px;
-      padding: 16px;
-      margin-bottom: 16px;
-      box-shadow: 0 2px 8px rgba(31, 49, 95, 0.06);
+    h1 { margin: 0 0 6px; font-size: 1.5rem; }
+    .muted { margin: 0 0 16px; color: #475569; font-size: .95rem; }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
     }
-    .row {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-      align-items: center;
-    }
-    input, select, button {
+
+    input, button {
       font: inherit;
-      padding: 8px 10px;
-      border-radius: 8px;
-      border: 1px solid #bdc8e2;
+      border-radius: 10px;
+      border: 1px solid #bfcaea;
+      padding: 12px 14px;
     }
+
+    input {
+      width: 100%;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 1rem;
+    }
+
+    .ops {
+      display: grid;
+      grid-template-columns: repeat(7, minmax(60px, 1fr));
+      gap: 8px;
+    }
+
     button {
       cursor: pointer;
-      background: #1f6feb;
+      background: #1d4ed8;
       color: #fff;
-      border-color: #1f6feb;
+      border-color: #1d4ed8;
+      font-weight: 700;
     }
+
     button.secondary {
       background: #fff;
-      color: #1f6feb;
+      color: #1d4ed8;
+      border-color: #aab9e4;
+      font-weight: 600;
     }
-    .denoms {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(88px, 1fr));
-      gap: 8px;
-      margin-top: 12px;
-    }
-    .hucha-item {
-      border: 1px solid #d9e1f2;
+
+    .result {
+      background: #f8fbff;
+      border: 1px solid #d6e1ff;
       border-radius: 10px;
       padding: 12px;
-      margin-top: 12px;
-      background: #fbfcff;
+      min-height: 96px;
     }
-    .total {
-      font-size: 1.25rem;
-      font-weight: 700;
-      margin-top: 10px;
-      color: #0a7a35;
+
+    .result code {
+      display: block;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      word-break: break-all;
+      white-space: pre-wrap;
+      color: #0b1324;
+      margin-top: 6px;
     }
-    .small { color: #5d6a85; font-size: .95rem; }
-    ul { margin: 8px 0 0 16px; }
+
+    .error { color: #b91c1c; }
+
+    @media (max-width: 700px) {
+      .ops { grid-template-columns: repeat(3, 1fr); }
+    }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>Programa de huchas en euros</h1>
+  <main class="app">
+    <h1>Calculadora de números grandes</h1>
+    <p class="muted">Opera enteros gigantes sin perder precisión usando <strong>BigInt</strong>.</p>
 
-    <section class="card">
-      <h2>Crear una nueva hucha</h2>
-      <div class="row">
-        <input id="nombreHucha" type="text" placeholder="Ejemplo: Viaje, Coche, Regalo..." />
-        <button id="crearBtn">Crear hucha</button>
+    <section class="grid" aria-label="calculadora">
+      <label for="a">Número A</label>
+      <input id="a" type="text" inputmode="numeric" placeholder="Ej: 999999999999999999999999" />
+
+      <label for="b">Número B</label>
+      <input id="b" type="text" inputmode="numeric" placeholder="Ej: 123456789012345678901234" />
+
+      <div class="ops">
+        <button data-op="+">A + B</button>
+        <button data-op="-">A - B</button>
+        <button data-op="*">A × B</button>
+        <button data-op="/">A ÷ B</button>
+        <button data-op="%">A % B</button>
+        <button data-op="**">A ^ B</button>
+        <button id="swap" class="secondary" type="button">Intercambiar</button>
       </div>
-      <p class="small">Puedes crear varias huchas y añadir monedas o billetes en euros a cada una.</p>
-    </section>
 
-    <section class="card">
-      <h2>Mis huchas</h2>
-      <div id="huchas"></div>
+      <div class="ops">
+        <button id="clear" class="secondary" type="button">Limpiar</button>
+        <button id="fill" class="secondary" type="button">Ejemplo grande</button>
+      </div>
+
+      <div class="result" aria-live="polite">
+        <strong>Resultado</strong>
+        <code id="out">Introduce dos números enteros y elige una operación.</code>
+      </div>
     </section>
-  </div>
+  </main>
 
   <script>
-    const denominaciones = [0.01, 0.02, 0.05, 0.10, 0.20, 0.50, 1, 2, 5, 10, 20, 50, 100, 200, 500];
-    const huchas = [];
+    const inputA = document.getElementById('a');
+    const inputB = document.getElementById('b');
+    const out = document.getElementById('out');
 
-    const formatEuro = (value) => value.toLocaleString('es-ES', { style: 'currency', currency: 'EUR' });
-
-    function crearHucha(nombre) {
-      return {
-        id: crypto.randomUUID(),
-        nombre,
-        contenido: Object.fromEntries(denominaciones.map(d => [d, 0]))
-      };
-    }
-
-    function totalHucha(hucha) {
-      return denominaciones.reduce((acc, d) => acc + d * hucha.contenido[d], 0);
-    }
-
-    function render() {
-      const list = document.getElementById('huchas');
-      list.innerHTML = '';
-
-      if (huchas.length === 0) {
-        list.innerHTML = '<p class="small">Aún no has creado ninguna hucha.</p>';
-        return;
+    function cleanInt(value) {
+      const normalized = value.trim();
+      if (!/^[-+]?\d+$/.test(normalized)) {
+        throw new Error('Solo se permiten enteros (sin comas ni decimales).');
       }
+      return BigInt(normalized);
+    }
 
-      huchas.forEach((hucha) => {
-        const wrapper = document.createElement('article');
-        wrapper.className = 'hucha-item';
+    function setResult(text, isError = false) {
+      out.textContent = text;
+      out.className = isError ? 'error' : '';
+    }
 
-        const top = document.createElement('div');
-        top.className = 'row';
+    function calculate(op) {
+      try {
+        const a = cleanInt(inputA.value);
+        const b = cleanInt(inputB.value);
+        let result;
 
-        const title = document.createElement('h3');
-        title.textContent = hucha.nombre;
-        title.style.margin = '0';
-
-        const removeBtn = document.createElement('button');
-        removeBtn.textContent = 'Eliminar';
-        removeBtn.className = 'secondary';
-        removeBtn.addEventListener('click', () => {
-          const idx = huchas.findIndex(h => h.id === hucha.id);
-          if (idx >= 0) {
-            huchas.splice(idx, 1);
-            render();
-          }
-        });
-
-        top.append(title, removeBtn);
-
-        const buttons = document.createElement('div');
-        buttons.className = 'denoms';
-
-        denominaciones.forEach((d) => {
-          const b = document.createElement('button');
-          b.textContent = `+ ${formatEuro(d)}`;
-          b.addEventListener('click', () => {
-            hucha.contenido[d] += 1;
-            render();
-          });
-          buttons.appendChild(b);
-        });
-
-        const resumen = document.createElement('ul');
-        denominaciones.forEach((d) => {
-          const cantidad = hucha.contenido[d];
-          if (cantidad > 0) {
-            const li = document.createElement('li');
-            li.textContent = `${cantidad} x ${formatEuro(d)} = ${formatEuro(cantidad * d)}`;
-            resumen.appendChild(li);
-          }
-        });
-
-        if (!resumen.children.length) {
-          const vacio = document.createElement('p');
-          vacio.className = 'small';
-          vacio.textContent = 'Esta hucha está vacía.';
-          wrapper.append(top, buttons, vacio);
-        } else {
-          wrapper.append(top, buttons, resumen);
+        switch (op) {
+          case '+': result = a + b; break;
+          case '-': result = a - b; break;
+          case '*': result = a * b; break;
+          case '/':
+            if (b === 0n) throw new Error('No se puede dividir entre cero.');
+            result = a / b;
+            break;
+          case '%':
+            if (b === 0n) throw new Error('No se puede usar módulo con cero.');
+            result = a % b;
+            break;
+          case '**':
+            if (b < 0n) throw new Error('El exponente debe ser positivo o cero.');
+            if (b > 10000n) throw new Error('Exponente demasiado grande (máximo recomendado: 10000).');
+            result = a ** b;
+            break;
+          default:
+            throw new Error('Operación no soportada.');
         }
 
-        const total = document.createElement('p');
-        total.className = 'total';
-        total.textContent = `Total: ${formatEuro(totalHucha(hucha))}`;
-        wrapper.appendChild(total);
-
-        list.appendChild(wrapper);
-      });
+        setResult(String(result));
+      } catch (err) {
+        setResult(err.message, true);
+      }
     }
 
-    document.getElementById('crearBtn').addEventListener('click', () => {
-      const input = document.getElementById('nombreHucha');
-      const nombre = input.value.trim();
-      if (!nombre) {
-        input.focus();
-        return;
-      }
-      huchas.push(crearHucha(nombre));
-      input.value = '';
-      render();
+    document.querySelectorAll('[data-op]').forEach((btn) => {
+      btn.addEventListener('click', () => calculate(btn.dataset.op));
     });
 
-    render();
+    document.getElementById('swap').addEventListener('click', () => {
+      const tmp = inputA.value;
+      inputA.value = inputB.value;
+      inputB.value = tmp;
+      setResult('Valores intercambiados.');
+    });
+
+    document.getElementById('clear').addEventListener('click', () => {
+      inputA.value = '';
+      inputB.value = '';
+      setResult('Introduce dos números enteros y elige una operación.');
+      inputA.focus();
+    });
+
+    document.getElementById('fill').addEventListener('click', () => {
+      inputA.value = '9876543210987654321098765432109876543210';
+      inputB.value = '1234567890123456789012345678901234567890';
+      setResult('Ejemplo cargado. Elige una operación.');
+    });
   </script>
 </body>
 </html>
