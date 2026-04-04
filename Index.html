@@ -3,203 +3,279 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Calculadora de Números Grandes</title>
+  <title>Control de Hucha</title>
   <style>
-    :root { color-scheme: light; }
     * { box-sizing: border-box; }
     body {
       margin: 0;
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      background: linear-gradient(160deg, #eef2ff, #f8fafc);
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      background: linear-gradient(145deg, #eff6ff, #f8fafc);
       color: #0f172a;
       min-height: 100vh;
+      padding: 24px;
       display: grid;
       place-items: center;
-      padding: 20px;
     }
     .app {
-      width: min(860px, 100%);
-      background: #ffffff;
-      border: 1px solid #dbe3f7;
-      border-radius: 16px;
+      width: min(820px, 100%);
+      background: #fff;
+      border: 1px solid #dbeafe;
+      border-radius: 18px;
       padding: 20px;
-      box-shadow: 0 10px 30px rgba(37, 57, 108, 0.12);
-    }
-    h1 { margin: 0 0 6px; font-size: 1.5rem; }
-    .muted { margin: 0 0 16px; color: #475569; font-size: .95rem; }
-
-    .grid {
+      box-shadow: 0 18px 40px rgba(30, 64, 175, .12);
       display: grid;
-      grid-template-columns: 1fr;
-      gap: 12px;
+      gap: 18px;
     }
-
-    input, button {
+    h1 { margin: 0; }
+    p { margin: 0; color: #334155; }
+    .panel {
+      border: 1px solid #e2e8f0;
+      border-radius: 14px;
+      padding: 14px;
+      background: #f8fafc;
+    }
+    .totales {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+    .kpi {
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 10px;
+    }
+    .kpi span { display: block; color: #475569; font-size: .85rem; }
+    .kpi strong { font-size: 1.3rem; }
+    form {
+      display: grid;
+      gap: 10px;
+      grid-template-columns: repeat(4, 1fr);
+      align-items: end;
+    }
+    label { font-size: .9rem; display: grid; gap: 6px; }
+    input, select, button {
       font: inherit;
+      padding: 10px;
       border-radius: 10px;
-      border: 1px solid #bfcaea;
-      padding: 12px 14px;
+      border: 1px solid #cbd5e1;
     }
-
-    input {
-      width: 100%;
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-      font-size: 1rem;
-    }
-
-    .ops {
-      display: grid;
-      grid-template-columns: repeat(7, minmax(60px, 1fr));
-      gap: 8px;
-    }
-
     button {
-      cursor: pointer;
+      border-color: #1d4ed8;
       background: #1d4ed8;
       color: #fff;
-      border-color: #1d4ed8;
       font-weight: 700;
+      cursor: pointer;
     }
-
-    button.secondary {
+    button.secundario {
       background: #fff;
       color: #1d4ed8;
-      border-color: #aab9e4;
-      font-weight: 600;
     }
-
-    .result {
-      background: #f8fbff;
-      border: 1px solid #d6e1ff;
-      border-radius: 10px;
-      padding: 12px;
-      min-height: 96px;
+    .meta {
+      display: grid;
+      gap: 8px;
+      grid-template-columns: 1fr auto;
+      align-items: center;
     }
-
-    .result code {
-      display: block;
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-      word-break: break-all;
-      white-space: pre-wrap;
-      color: #0b1324;
-      margin-top: 6px;
+    progress {
+      width: 100%;
+      height: 14px;
+      accent-color: #16a34a;
     }
+    table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 10px; overflow: hidden; }
+    th, td { padding: 10px; border-bottom: 1px solid #e2e8f0; text-align: left; }
+    th { background: #f1f5f9; font-size: .9rem; }
+    td.importe { font-weight: 700; }
+    .entrada { color: #047857; }
+    .salida { color: #b91c1c; }
+    .acciones { display: flex; gap: 8px; }
 
-    .error { color: #b91c1c; }
-
-    @media (max-width: 700px) {
-      .ops { grid-template-columns: repeat(3, 1fr); }
+    @media (max-width: 760px) {
+      .totales, form { grid-template-columns: 1fr; }
+      .acciones { flex-direction: column; }
     }
   </style>
 </head>
 <body>
   <main class="app">
-    <h1>Calculadora de números grandes</h1>
-    <p class="muted">Opera enteros gigantes sin perder precisión usando <strong>BigInt</strong>.</p>
+    <header>
+      <h1>Control de Hucha</h1>
+      <p>Apunta lo que metes o sacas de tu hucha y sigue tu progreso hacia una meta.</p>
+    </header>
 
-    <section class="grid" aria-label="calculadora">
-      <label for="a">Número A</label>
-      <input id="a" type="text" inputmode="numeric" placeholder="Ej: 999999999999999999999999" />
+    <section class="panel totales" aria-label="resumen">
+      <article class="kpi"><span>Saldo actual</span><strong id="saldo">0,00 €</strong></article>
+      <article class="kpi"><span>Total ahorrado</span><strong id="ahorrado">0,00 €</strong></article>
+      <article class="kpi"><span>Total retirado</span><strong id="retirado">0,00 €</strong></article>
+    </section>
 
-      <label for="b">Número B</label>
-      <input id="b" type="text" inputmode="numeric" placeholder="Ej: 123456789012345678901234" />
+    <section class="panel" aria-label="movimientos">
+      <form id="form-movimiento">
+        <label>Tipo
+          <select id="tipo">
+            <option value="ingreso">Ingreso</option>
+            <option value="retiro">Retiro</option>
+          </select>
+        </label>
+        <label>Importe (€)
+          <input id="importe" type="number" min="0.01" step="0.01" required>
+        </label>
+        <label>Concepto
+          <input id="concepto" type="text" maxlength="45" placeholder="Ej: paga semanal" required>
+        </label>
+        <button type="submit">Guardar movimiento</button>
+      </form>
+    </section>
 
-      <div class="ops">
-        <button data-op="+">A + B</button>
-        <button data-op="-">A - B</button>
-        <button data-op="*">A × B</button>
-        <button data-op="/">A ÷ B</button>
-        <button data-op="%">A % B</button>
-        <button data-op="**">A ^ B</button>
-        <button id="swap" class="secondary" type="button">Intercambiar</button>
+    <section class="panel" aria-label="meta">
+      <div class="meta">
+        <label>Meta de ahorro (€)
+          <input id="meta" type="number" min="1" step="1" value="200">
+        </label>
+        <div class="acciones">
+          <button id="guardar-meta" type="button" class="secundario">Guardar meta</button>
+          <button id="vaciar" type="button" class="secundario">Vaciar historial</button>
+        </div>
       </div>
+      <p id="meta-texto">Llevas 0,00 € de 200,00 € (0%).</p>
+      <progress id="barra-meta" value="0" max="100"></progress>
+    </section>
 
-      <div class="ops">
-        <button id="clear" class="secondary" type="button">Limpiar</button>
-        <button id="fill" class="secondary" type="button">Ejemplo grande</button>
-      </div>
-
-      <div class="result" aria-live="polite">
-        <strong>Resultado</strong>
-        <code id="out">Introduce dos números enteros y elige una operación.</code>
-      </div>
+    <section class="panel" aria-label="historial">
+      <table>
+        <thead>
+          <tr>
+            <th>Fecha</th>
+            <th>Concepto</th>
+            <th>Tipo</th>
+            <th>Importe</th>
+          </tr>
+        </thead>
+        <tbody id="historial"></tbody>
+      </table>
     </section>
   </main>
 
   <script>
-    const inputA = document.getElementById('a');
-    const inputB = document.getElementById('b');
-    const out = document.getElementById('out');
+    const CLAVE_MOVIMIENTOS = 'hucha_movimientos';
+    const CLAVE_META = 'hucha_meta';
 
-    function cleanInt(value) {
-      const normalized = value.trim();
-      if (!/^[-+]?\d+$/.test(normalized)) {
-        throw new Error('Solo se permiten enteros (sin comas ni decimales).');
+    const saldoEl = document.getElementById('saldo');
+    const ahorradoEl = document.getElementById('ahorrado');
+    const retiradoEl = document.getElementById('retirado');
+    const historialEl = document.getElementById('historial');
+    const metaInput = document.getElementById('meta');
+    const metaTexto = document.getElementById('meta-texto');
+    const barraMeta = document.getElementById('barra-meta');
+
+    const form = document.getElementById('form-movimiento');
+    const tipoInput = document.getElementById('tipo');
+    const importeInput = document.getElementById('importe');
+    const conceptoInput = document.getElementById('concepto');
+
+    const formatoMoneda = new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' });
+
+    const cargarMovimientos = () => JSON.parse(localStorage.getItem(CLAVE_MOVIMIENTOS) || '[]');
+    const guardarMovimientos = (datos) => localStorage.setItem(CLAVE_MOVIMIENTOS, JSON.stringify(datos));
+    const cargarMeta = () => Number(localStorage.getItem(CLAVE_META) || 200);
+
+    function guardarMeta() {
+      const valor = Number(metaInput.value);
+      if (!Number.isFinite(valor) || valor <= 0) {
+        alert('La meta debe ser un número mayor que 0.');
+        return;
       }
-      return BigInt(normalized);
+      localStorage.setItem(CLAVE_META, String(valor));
+      render();
     }
 
-    function setResult(text, isError = false) {
-      out.textContent = text;
-      out.className = isError ? 'error' : '';
+    function agregarMovimiento(event) {
+      event.preventDefault();
+      const importe = Number(importeInput.value);
+      const concepto = conceptoInput.value.trim();
+      const tipo = tipoInput.value;
+
+      if (!Number.isFinite(importe) || importe <= 0) {
+        alert('Introduce un importe válido.');
+        return;
+      }
+      if (!concepto) {
+        alert('Añade un concepto para el movimiento.');
+        return;
+      }
+
+      const movimientos = cargarMovimientos();
+      movimientos.unshift({
+        id: crypto.randomUUID(),
+        fecha: new Date().toISOString(),
+        concepto,
+        tipo,
+        importe
+      });
+
+      guardarMovimientos(movimientos);
+      form.reset();
+      tipoInput.value = 'ingreso';
+      render();
     }
 
-    function calculate(op) {
-      try {
-        const a = cleanInt(inputA.value);
-        const b = cleanInt(inputB.value);
-        let result;
+    function vaciarHistorial() {
+      if (!confirm('¿Seguro que quieres borrar todos los movimientos?')) return;
+      localStorage.removeItem(CLAVE_MOVIMIENTOS);
+      render();
+    }
 
-        switch (op) {
-          case '+': result = a + b; break;
-          case '-': result = a - b; break;
-          case '*': result = a * b; break;
-          case '/':
-            if (b === 0n) throw new Error('No se puede dividir entre cero.');
-            result = a / b;
-            break;
-          case '%':
-            if (b === 0n) throw new Error('No se puede usar módulo con cero.');
-            result = a % b;
-            break;
-          case '**':
-            if (b < 0n) throw new Error('El exponente debe ser positivo o cero.');
-            if (b > 10000n) throw new Error('Exponente demasiado grande (máximo recomendado: 10000).');
-            result = a ** b;
-            break;
-          default:
-            throw new Error('Operación no soportada.');
-        }
+    function renderHistorial(movimientos) {
+      historialEl.innerHTML = '';
+      if (!movimientos.length) {
+        historialEl.innerHTML = '<tr><td colspan="4">Sin movimientos todavía.</td></tr>';
+        return;
+      }
 
-        setResult(String(result));
-      } catch (err) {
-        setResult(err.message, true);
+      for (const mov of movimientos) {
+        const fila = document.createElement('tr');
+        const importeClass = mov.tipo === 'ingreso' ? 'entrada' : 'salida';
+        const signo = mov.tipo === 'ingreso' ? '+' : '-';
+        fila.innerHTML = `
+          <td>${new Date(mov.fecha).toLocaleDateString('es-ES')}</td>
+          <td>${mov.concepto}</td>
+          <td>${mov.tipo}</td>
+          <td class="importe ${importeClass}">${signo}${formatoMoneda.format(mov.importe)}</td>
+        `;
+        historialEl.appendChild(fila);
       }
     }
 
-    document.querySelectorAll('[data-op]').forEach((btn) => {
-      btn.addEventListener('click', () => calculate(btn.dataset.op));
-    });
+    function render() {
+      const movimientos = cargarMovimientos();
+      const meta = cargarMeta();
+      metaInput.value = meta;
 
-    document.getElementById('swap').addEventListener('click', () => {
-      const tmp = inputA.value;
-      inputA.value = inputB.value;
-      inputB.value = tmp;
-      setResult('Valores intercambiados.');
-    });
+      const totalIngreso = movimientos
+        .filter((m) => m.tipo === 'ingreso')
+        .reduce((acc, m) => acc + m.importe, 0);
 
-    document.getElementById('clear').addEventListener('click', () => {
-      inputA.value = '';
-      inputB.value = '';
-      setResult('Introduce dos números enteros y elige una operación.');
-      inputA.focus();
-    });
+      const totalRetiro = movimientos
+        .filter((m) => m.tipo === 'retiro')
+        .reduce((acc, m) => acc + m.importe, 0);
 
-    document.getElementById('fill').addEventListener('click', () => {
-      inputA.value = '9876543210987654321098765432109876543210';
-      inputB.value = '1234567890123456789012345678901234567890';
-      setResult('Ejemplo cargado. Elige una operación.');
-    });
+      const saldo = totalIngreso - totalRetiro;
+      const progreso = Math.max(0, Math.min(100, (saldo / meta) * 100));
+
+      saldoEl.textContent = formatoMoneda.format(saldo);
+      ahorradoEl.textContent = formatoMoneda.format(totalIngreso);
+      retiradoEl.textContent = formatoMoneda.format(totalRetiro);
+      metaTexto.textContent = `Llevas ${formatoMoneda.format(saldo)} de ${formatoMoneda.format(meta)} (${progreso.toFixed(1)}%).`;
+      barraMeta.value = progreso;
+
+      renderHistorial(movimientos);
+    }
+
+    form.addEventListener('submit', agregarMovimiento);
+    document.getElementById('guardar-meta').addEventListener('click', guardarMeta);
+    document.getElementById('vaciar').addEventListener('click', vaciarHistorial);
+
+    render();
   </script>
 </body>
 </html>
